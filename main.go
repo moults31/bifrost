@@ -1,4 +1,4 @@
-package main
+package bifrost
 
 import (
 	"flag"
@@ -93,50 +93,7 @@ func readConfig(configName string) (portPath string, baud int, err error) {
 	return
 }
 
-func main() {
-	var portPath string
-	var baud int
-	var saveConfig bool
-	var loadConfig string
-	var help bool
-
-	flag.StringVar(&portPath, "port-path", "/dev/tty.usbserial", "Name/path of the serial port")
-	flag.IntVar(&baud, "baud", 115200, "The baud rate to use on the connection")
-	flag.BoolVar(&saveConfig, "save-config", false, "Save a connection configuration")
-	flag.StringVar(&loadConfig, "load-config", "", "Load a connection configuration")
-	flag.BoolVar(&help, "help", false, "A brief help message")
-	flag.Parse()
-
-	if saveConfig {
-		var configName string
-		fmt.Println("What name do you want to save this config under?")
-		fmt.Scanln(&configName)
-		err := writeConfig(configName, portPath, baud)
-		if err != nil {
-			log.Printf("Failed to save config. FatalError: %v\n", err)
-			return
-		}
-		fmt.Printf("Config saved! You can view and edit your configurations at %s%s.\n", configDir, configFile)
-		return
-	}
-
-	if loadConfig != "" {
-		fmt.Printf("Loading config %s...\n", loadConfig)
-		cfgPortPath, cfgBaud, err := readConfig(loadConfig)
-		if err != nil {
-			log.Printf("Failed to load config. FatalError: %v\n", err)
-			return
-		}
-		portPath = cfgPortPath
-		baud = cfgBaud
-		fmt.Println("Config loaded successfully.")
-	}
-
-	if help {
-		fmt.Println(helpText)
-		return
-	}
-
+func Run(portPath string, baud int) {
 	connect, err := NewConnection(portPath, baud)
 	if err != nil {
 		log.Printf("FatalError: %v\n", err)
@@ -182,4 +139,51 @@ func main() {
 			}
 		}
 	}
+}
+
+func main() {
+	var portPath string
+	var baud int
+	var saveConfig bool
+	var loadConfig string
+	var help bool
+
+	flag.StringVar(&portPath, "port-path", "/dev/tty.usbserial", "Name/path of the serial port")
+	flag.IntVar(&baud, "baud", 115200, "The baud rate to use on the connection")
+	flag.BoolVar(&saveConfig, "save-config", false, "Save a connection configuration")
+	flag.StringVar(&loadConfig, "load-config", "", "Load a connection configuration")
+	flag.BoolVar(&help, "help", false, "A brief help message")
+	flag.Parse()
+
+	if saveConfig {
+		var configName string
+		fmt.Println("What name do you want to save this config under?")
+		fmt.Scanln(&configName)
+		err := writeConfig(configName, portPath, baud)
+		if err != nil {
+			log.Printf("Failed to save config. FatalError: %v\n", err)
+			return
+		}
+		fmt.Printf("Config saved! You can view and edit your configurations at %s%s.\n", configDir, configFile)
+		return
+	}
+
+	if loadConfig != "" {
+		fmt.Printf("Loading config %s...\n", loadConfig)
+		cfgPortPath, cfgBaud, err := readConfig(loadConfig)
+		if err != nil {
+			log.Printf("Failed to load config. FatalError: %v\n", err)
+			return
+		}
+		portPath = cfgPortPath
+		baud = cfgBaud
+		fmt.Println("Config loaded successfully.")
+	}
+
+	if help {
+		fmt.Println(helpText)
+		return
+	}
+
+	Run(portPath, baud)
 }

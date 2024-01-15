@@ -1,4 +1,4 @@
-module github.com/ishuah/bifrost
+module github.com/moults31/bifrost
 
 go 1.13
 

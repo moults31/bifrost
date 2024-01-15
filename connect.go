@@ -1,4 +1,4 @@
-package main
+package bifrost
 
 import (
 	"bufio"
@@ -66,15 +66,17 @@ func (c *Connect) initialize() {
 }
 
 func (c *Connect) read() {
+	buf := make([]byte, 256)
+
 	for {
-		response, err := c.portReader.ReadBytes('\n')
+		n, err := c.portReader.Read(buf)
 		// report the error
 		if err != nil && err != io.EOF {
 			c.stateChan <- err
 			return
 		}
-		if len(response) > 0 {
-			fmt.Print(string(response))
+		if n > 0 {
+			fmt.Print(string(buf[:n]))
 		}
 	}
 }
